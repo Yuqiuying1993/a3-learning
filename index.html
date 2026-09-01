@@ -3,12 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A3 学习型管理 · 每日学习室</title>
+  <title>A3 学习型管理 · 三镜化合学习室</title>
   <link rel="stylesheet" href="styles.css" />
-  <!-- manifest 用当日日期做缓存破坏，保证新一天的课程立刻可见 -->
   <script>
-    window.__A3_CB = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-    document.write('<script src="data/manifest.js?_cb=' + window.__A3_CB + '"><\/script>');
+    window.__SITE_CB = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    // ---- 站点配置：两站共用同一份 app.js，仅此处不同 ----
+    window.SITE = {
+      keyPrefix: "a3",
+      brandTitle: "A3 学习型管理 · 三镜化合学习室",
+      brandSub: "给审计人的 A3 问题解决方法论 · A3思维镜 × 审计方法论镜 × 自工序完结镜",
+      logo: "📘",
+      manifestVar: "A3_MANIFEST",
+      daysVar: "A3_DAYS",
+      planVar: "A3_PLAN",
+      workbookVar: "A3_WORKBOOK",
+      baseUrl: "https://ruijie.feishu.cn/base/NjQYbJ2VIakvjWsFZCKcxB92nCe",
+      archiveName: "A3学习档案",
+      phases: ["校准", "演练", "化合"],
+      phaseDesc: {
+        "校准": "把 A3 骨架打牢：四条铁律 + 审计动作对照",
+        "演练": "3 个递进采购审计案例，全真模拟写 A3",
+        "化合": "三镜融合，端到端跑通一份完整 A3 报告"
+      }
+    };
+    document.write('<script src="data/manifest.js?_cb=' + window.__SITE_CB + '"><\/script>');
   </script>
 </head>
 <body>
@@ -16,13 +34,14 @@
     <div class="brand">
       <span class="logo">📘</span>
       <div>
-        <div class="brand-title">A3 学习型管理 · 每日学习室</div>
-        <div class="brand-sub">给审计人的 A3 问题解决方法论 · 网页版</div>
+        <div class="brand-title">A3 学习型管理 · 三镜化合学习室</div>
+        <div class="brand-sub">A3思维镜 × 审计方法论镜 × 自工序完结镜</div>
       </div>
     </div>
     <div class="top-actions">
-      <button class="ghost-btn" id="teamBoardBtn" title="打开团队排行榜（飞书多维表格，需先对团队共享）">🏆 团队榜</button>
-      <button class="ghost-btn" id="exportBtn" title="导出学习档案（分数+心得+简答作答）">📦 导出</button>
+      <button class="ghost-btn" id="workbookBtn" title="打开案例工作簿（汇总 3 个案例的演练作答）">📒 案例工作簿</button>
+      <button class="ghost-btn" id="teamBoardBtn" title="打开团队排行榜（飞书多维表格）">🏆 团队榜</button>
+      <button class="ghost-btn" id="exportBtn" title="导出学习档案">📦 导出</button>
       <button class="ghost-btn" id="importBtn" title="从备份文件恢复学习档案">📥 导入</button>
       <input type="file" id="importFile" accept="application/json" hidden />
       <span class="backup-badge" id="backupBadge" title="每次保存会自动把整套档案下载到你的下载文件夹；换网址后用「📥 导入」选中该文件即可恢复">☁️ 自动备份已开启</span>
@@ -30,26 +49,33 @@
     </div>
   </header>
 
+  <!-- 三镜化合理念条 -->
+  <div class="lens-bar">
+    <div class="lens lens-a3">🔷 A3思维镜<small>逻辑化拆解问题</small></div>
+    <div class="lens-arrow">×</div>
+    <div class="lens lens-audit">🟣 审计方法论镜<small>端到端找真问题</small></div>
+    <div class="lens-arrow">×</div>
+    <div class="lens lens-job">🟠 自工序完结镜<small>不把缺陷流给下游</small></div>
+  </div>
+
   <div class="layout">
     <aside class="sidebar">
       <div class="sidebar-head">
-        <span>课程日历</span>
+        <span>课程目录（按阶段）</span>
         <button class="ghost-btn" id="showAllRefBtn" title="查看全部心得">💡 全部心得</button>
       </div>
       <nav class="day-list" id="dayList"></nav>
       <div class="sidebar-tip">
-        内容每日 09:00 由「A3 改善教练」专家生成并经飞书推送，同时写入本网页，便于随时复习。
+        内容全部开放，自定进度练习。每天一段「学习 + 演练/小测 + 案例 + 心得」，成绩与作答自动保存在本浏览器。
       </div>
     </aside>
 
     <main class="content" id="content">
       <div class="plan-box" id="planBox"></div>
-      <div class="recent30-box" id="recent30Box"></div>
-      <div class="calendar-box" id="calendarBox"></div>
 
       <div class="today-banner" id="todayBanner" hidden>
         <div class="today-left">
-          <span class="today-label">📌 今日主题</span>
+          <span class="today-label">📌 最后一天</span>
           <div class="today-title" id="todayTitle"></div>
           <div class="today-one" id="todayOne"></div>
         </div>
@@ -57,8 +83,8 @@
       </div>
 
       <div class="empty-state" id="emptyState">
-        <div class="empty-emoji">📚</div>
-        <p>从左侧选择一天开始学习</p>
+        <div class="empty-emoji">📘</div>
+        <p>从左侧选择一天开始练习 · 或点上方「📒 案例工作簿」看汇总</p>
       </div>
 
       <article class="lesson" id="lesson" hidden>
@@ -72,13 +98,15 @@
 
         <nav class="tabs" id="tabs">
           <button class="tab active" data-tab="learning">📖 学习</button>
+          <button class="tab" data-tab="drill" hidden>🔍 演练</button>
           <button class="tab" data-tab="exam">✏️ 考试</button>
-          <button class="tab" data-tab="case">🔍 案例</button>
+          <button class="tab" data-tab="case">📂 案例</button>
           <button class="tab" data-tab="resources">📚 拓展</button>
           <button class="tab" data-tab="reflection">💡 心得</button>
         </nav>
 
         <section class="panel" id="panel-learning"></section>
+        <section class="panel" id="panel-drill" hidden></section>
         <section class="panel" id="panel-exam" hidden></section>
         <section class="panel" id="panel-case" hidden></section>
         <section class="panel" id="panel-resources" hidden></section>
@@ -95,6 +123,17 @@
         <button class="ghost-btn" id="closeAllRef">✕</button>
       </div>
       <div class="modal-body" id="allRefBody"></div>
+    </div>
+  </div>
+
+  <!-- 案例工作簿弹窗 -->
+  <div class="modal" id="workbookModal" hidden>
+    <div class="modal-box modal-wide">
+      <div class="modal-head">
+        <h3>📒 案例工作簿 · 三个递进采购审计案例</h3>
+        <button class="ghost-btn" id="closeWorkbook">✕</button>
+      </div>
+      <div class="modal-body" id="workbookBody"></div>
     </div>
   </div>
 
@@ -145,7 +184,6 @@
     </div>
   </div>
 
-  <script>document.write('<script src="data/plan.js?_cb=' + window.__A3_CB + '"><\/script>');</script>
-  <script>document.write('<script src="app.js?_cb=' + window.__A3_CB + '"><\/script>');</script>
+  <script>document.write('<script src="data/workbook.js?_cb=' + window.__SITE_CB + '"><\/script>');document.write('<script src="app.js?_cb=' + window.__SITE_CB + '"><\/script>');</script>
 </body>
 </html>
